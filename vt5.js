@@ -80,7 +80,7 @@ function luoJoukkueet(data) {
  * @param {Object} data 
  */
 function luoKartallaAlue(data) {
-	let kartalla = document.getElementById("kartallalista");
+	let kartalla = document.getElementById("kartalla");
 
 	kartalla.addEventListener("dragover", (e) => {
 		e.preventDefault();
@@ -97,7 +97,7 @@ function luoKartallaAlue(data) {
 
 		if (data) {
 			try {
-				e.target.appendChild(document.getElementById(data));
+				e.target.firstElementChild.appendChild(document.getElementById(data));
 			}
 			catch (error) {
 
