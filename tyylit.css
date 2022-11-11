@@ -1,4 +1,32 @@
 #map {
    width: 100vw;
-   height: 100vh;
+   height: 40vh;
+}
+
+#joukkueet, #rastit {
+   position: absolute;
+   top: 50vh;
+   width: 25vw;
+   height: 40vh;
+}
+
+#joukkueet {
+   left: 0;
+}
+
+
+#kartalla {
+   position: absolute;
+   top: 50vh;
+   left: 25vw;
+   width: 50vw;
+   height: 40vh;
+}
+
+#rastit {
+   left: 75vw;
+}
+
+h1 {
+   text-align: center;
 }
