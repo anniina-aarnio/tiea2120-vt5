@@ -27,7 +27,7 @@ window.addEventListener("load", function(e) {
  * - rastit-listaus, jossa raahattavat rastiennimet
  */
 function luoSivu(data) {
-	luoKartta();	// TODO: tuleeko tämän alle omanaan vai sisälle rastien piirtäminen?
+	luoKartta(data);
 	luoJoukkueet(data);
 	luoKartallaAlue(data);
 	luoRastit(data);
@@ -38,8 +38,19 @@ function luoSivu(data) {
  * Keskittää näkymän niin, että koko ajan näkyy kaikki rastit,
  * vaikka selaimen koko muuttuisi
  */
-function luoKartta() {
+function luoKartta(data) {
+	let mymap = new L.map('map', {
+		crs: L.TileLayer.MML.get3067Proj()
+	}).setView([62.2333, 25.7333], 11);
 
+	L.tileLayer.mml_wmts({
+		layer: "maastokartta",
+		key: "0cb805a7-7585-45ee-aa20-6c1a22e636b1"
+	}).addTo(mymap);
+
+	let kulmat = luoKartanRastit(mymap, data);
+
+	mymap.fitBounds(kulmat);
 }
 
 /**
@@ -76,7 +87,7 @@ function luoJoukkueet(data) {
 }
 
 /**
- * 
+ * Luo kartalla-alueen, joka on droppable-area
  * @param {Object} data 
  */
 function luoKartallaAlue(data) {
@@ -95,6 +106,7 @@ function luoKartallaAlue(data) {
 		e.preventDefault();
 		let data = e.dataTransfer.getData("text");
 
+		// TODO: tulisiko tähän kohtaan myös karttaan hommelin piirtäminen?
 		if (data) {
 			try {
 				e.target.firstElementChild.appendChild(document.getElementById(data));
@@ -142,8 +154,40 @@ function luoRastit(data) {
 }
 
 
-// Raahauksen yhteiset apufunktiot
+// Kartan luonnin apufunktioita
 
+/**
+ * 
+ * @param {Object} mymap, johon rastien merkit liitetään
+ * @param {Object} data, josta rastit
+ */
+function luoKartanRastit(mymap, data) {
+	let rastit = Array.from(data.rastit);
+	let vasenYla = [rastit[0].lat, rastit[0].lon];
+	let oikeaAla = [rastit[1].lat, rastit[1].lon];
+
+	rastit.forEach(function(current, index, list) {
+		let circle = L.circle(
+			[current.lat, current.lon], {
+				color: "red",
+				fillColor: "red",
+				fillOpacity: 0.5,
+				radius: 150
+			}
+		).addTo(mymap);
+
+		// etsitään nurkkarastit
+		if (current.lat < vasenYla[0] && current.lon > vasenYla[1]) {
+			vasenYla[0] = current.lat;
+			vasenYla[1] = current.lon;
+		} else if (current.lat > oikeaAla[0] && current.lon < oikeaAla[1]) {
+			oikeaAla[0] = current.lat;
+			oikeaAla[1] = current.lon;
+		}
+	});
+
+	return [vasenYla, oikeaAla];
+}
 
 
 
@@ -179,6 +223,7 @@ function jarjestaKoodinMukaan(a, b) {
 
 
 // Muita apufunktioita
+
 function rainbow(numOfSteps, step) {
     // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
     // Adam Cole, 2011-Sept-14
