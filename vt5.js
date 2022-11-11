@@ -50,6 +50,7 @@ function luoJoukkueet(data) {
 	let ul = document.getElementById("joukkuelista");
 
 	let lista = Array.from(data.joukkueet);
+	lista.sort(jarjestaNimenMukaan);
 
 	lista.forEach(function(current, index, list) {
 		let li = document.createElement("li");
@@ -90,7 +91,20 @@ function luoSateenkaarilista(lista, eventfunktio) {
 
 // Joukkueen luonnin apufunktioita
 
-
+/**
+ * Apufunktio joukkueen jäsenten järjestämiseen (sort)
+ * @param {Object} a joukkue 
+ * @param {Object} b toinen joukkue
+ */
+function jarjestaNimenMukaan(a, b) {
+	if (a.nimi.trim().toUpperCase() > b.nimi.trim().toUpperCase()) {
+		return 1;
+	}
+	if (b.nimi.trim().toUpperCase() > a.nimi.trim().toUpperCase()) {
+		return -1;
+	}
+	return 0;
+}
 
 
 // Rastien luonnin apufunktioita
