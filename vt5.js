@@ -122,11 +122,18 @@ function luoRastit(data) {
 		let li = document.createElement("li");
 		li.textContent = current.koodi;
 		li.style.backgroundColor = rainbow(lista.length, index);
+		li.id = "rasti" + (index + 1);
 		
 		// raahailu
 		li.setAttribute("draggable", "true");
 		li.addEventListener("dragstart", (e) => {
 			e.dataTransfer.setData("text/plain", "rasti" + (index + 1));
+			e.dataTransfer.effectAllowed = 'move';
+			e.target.className = "dragging";
+		});
+		li.addEventListener("dragend", (e) => {
+			// poistaa dragging-classin targetilta
+			e.target.classList.remove("dragging");
 		});
 
 		// lisätään listaan
