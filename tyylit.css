@@ -19,11 +19,15 @@ div > div {
 
 #otsikot, #alaosa {
    display: grid;
-   grid-template-columns: 25vw auto 25vw;
+   grid-template-columns: 1fr 800px 1fr;
 }
 
 #alaosa {
    height: 45vh;
+}
+
+#kartalla {
+   height: 500px;
 }
 
 ul {

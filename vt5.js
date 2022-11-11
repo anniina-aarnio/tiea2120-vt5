@@ -56,11 +56,18 @@ function luoJoukkueet(data) {
 		let li = document.createElement("li");
 		li.textContent = current.nimi;
 		li.style.backgroundColor = rainbow(lista.length, index);
+		li.id = "joukkue" + (index + 1);
 		
 		// raahailu
 		li.setAttribute("draggable", "true");
 		li.addEventListener("dragstart", (e) => {
 			e.dataTransfer.setData("text/plain", "joukkue" + (index + 1));
+			e.dataTransfer.effectAllowed = 'move';
+			e.target.className = "dragging";
+		});
+		li.addEventListener("dragend", (e) => {
+			// poistaa dragging-classin targetilta
+			e.target.classList.remove("dragging");
 		});
 
 		// lisätään listaan
@@ -73,8 +80,33 @@ function luoJoukkueet(data) {
  * @param {Object} data 
  */
 function luoKartallaAlue(data) {
+	let kartalla = document.getElementById("kartallalista");
 
+	kartalla.addEventListener("dragover", (e) => {
+		e.preventDefault();
+		if (e.dataTransfer.types.includes("text/plain")) {
+			e.dataTransfer.dropEffect = "move";
+		} else {
+			e.dataTransfer.dropEffect = "none";
+		}
+	});
+
+	kartalla.addEventListener("drop", (e) => {
+		e.preventDefault();
+		let data = e.dataTransfer.getData("text");
+
+		if (data) {
+			try {
+				e.target.appendChild(document.getElementById(data));
+			}
+			catch (error) {
+
+			}
+		}
+	});
 }
+
+
 
 /**
  * Luo rastilistauksen datan perusteella aakkosjärjestykseen
@@ -103,7 +135,9 @@ function luoRastit(data) {
 }
 
 
-// Joukkueen ja rastin luonnin yhteiset apufunktiot
+// Raahauksen yhteiset apufunktiot
+
+
 
 
 // Joukkueen luonnin apufunktioita
