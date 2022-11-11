@@ -54,8 +54,10 @@ function luoJoukkueet(data) {
 
 	lista.forEach(function(current, index, list) {
 		let li = document.createElement("li");
+		li.id = "joukkue" + (index + 1);
 		li.textContent = current.nimi;
 		li.style.backgroundColor = rainbow(lista.length, index);
+		li.setAttribute("draggable", "true");
 		ul.appendChild(li);
 	});
 }
@@ -80,8 +82,10 @@ function luoRastit(data) {
 
 	lista.forEach(function(current, index, list) {
 		let li = document.createElement("li");
+		li.id = "rasti" + (index + 1);
 		li.textContent = current.koodi;
 		li.style.backgroundColor = rainbow(lista.length, index);
+		li.setAttribute("draggable", "true");
 		ul.appendChild(li);
 	});
 }
