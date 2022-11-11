@@ -1,38 +1,33 @@
-#map {
-   width: 100vw;
-   height: 40vh;
-}
-
-#joukkueet, #rastit {
-   position: absolute;
-   top: 50vh;
-   width: 25vw;
-   height: 40vh;
-}
-
-#joukkueet {
-   left: 0;
-}
-
-
-#kartalla {
-   position: absolute;
-   top: 50vh;
-   left: 25vw;
-   width: 50vw;
-   height: 40vh;
-}
-
-#rastit {
-   left: 75vw;
-}
-
 h1 {
+   display: block;
+   margin: 0;
    text-align: center;
 }
 
-ul {
+div > div {
+   display: inline-block;
    border: 1px solid black;
+   margin: .5em;
+}
+
+#map {
+   width: 100vw;
+   height: 45vh;
    padding: 0;
+   margin: 0;
+}
+
+#otsikot, #alaosa {
+   display: grid;
+   grid-template-columns: 25vw auto 25vw;
+}
+
+#alaosa {
+   height: 45vh;
+}
+
+ul {
+   padding: 0;
+   margin: 0;
    list-style-type: none;
 }
