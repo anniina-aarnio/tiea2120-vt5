@@ -73,21 +73,22 @@ function luoKartallaAlue(data) {
  * @param {Object} data, josta rastien tiedot haetaan
  */
 function luoRastit(data) {
+	let ul = document.getElementById("rastilista");
 
+	let lista = Array.from(data.rastit);
+	lista.sort(jarjestaKoodinMukaan);
+
+	lista.forEach(function(current, index, list) {
+		let li = document.createElement("li");
+		li.textContent = current.koodi;
+		li.style.backgroundColor = rainbow(lista.length, index);
+		ul.appendChild(li);
+	});
 }
 
 
 // Joukkueen ja rastin luonnin yhteiset apufunktiot
 
-/**
- * Joukkuelista ja rastilista luodaan lähes identtisesti
- * Ainoastaan erona on se, miten kukin käyttäytyy eventissä
- * @param {Array} lista, jossa objecteja joilla object.nimi (paitsi rasteilla ei ole...)
- * @param {Function} eventfunktio, joka lisätään kullekin addEventListenerin funktioksi
- */
-function luoSateenkaarilista(lista, eventfunktio) {
-
-}
 
 // Joukkueen luonnin apufunktioita
 
@@ -109,6 +110,15 @@ function jarjestaNimenMukaan(a, b) {
 
 // Rastien luonnin apufunktioita
 
+function jarjestaKoodinMukaan(a, b) {
+	if (a.koodi.trim().toUpperCase() > b.koodi.trim().toUpperCase()) {
+		return -1;
+	}
+	if (b.koodi.trim().toUpperCase() > a.koodi.trim().toUpperCase()) {
+		return 1;
+	}
+	return 0;
+}
 
 
 // Muita apufunktioita
