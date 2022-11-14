@@ -28,10 +28,13 @@ div > div {
 
 #kartalla {
    height: 500px;
+   position: relative;
 }
 
 #kartallalista > li {
    width: max-content;
+   position: absolute;
+
 }
 
 ul {

@@ -110,7 +110,11 @@ function luoKartallaAlue(data) {
 		// TODO: tulisiko tähän kohtaan myös karttaan hommelin piirtäminen?
 		if (data) {
 			try {
-				e.target.firstElementChild.appendChild(document.getElementById(data));
+				let lisattava = document.getElementById(data);
+				e.target.firstElementChild.appendChild(lisattava);
+				lisattava.style.left = String(e.offsetX) + "px";
+				lisattava.style.top = String(e.offsetY) + "px";
+				console.log(lisattava, e.offsetX, e.offsetY);
 			}
 			catch (error) {
 
