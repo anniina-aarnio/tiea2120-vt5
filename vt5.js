@@ -50,8 +50,11 @@ function luoKartta(data) {
 
 	let rastit = luoKartanRastit(mymap, data);
 
-	// kartassa näkyy kaiokki rastit ja vähän padding
+	// kartassa näkyy kaikki rastit ja vähän padding
 	mymap.fitBounds(rastit, [[1,1], [1,1]]);
+
+	// lisätään kartta documentin map-elementtiin
+	document.getElementById("map").kartta = mymap;
 }
 
 /**
@@ -84,6 +87,9 @@ function luoJoukkueet(data) {
 
 		// lisätään listaan
 		ul.appendChild(li);
+
+		// lisätään joukkueen viittaus li-elementtiin
+		li.joukkue = current;
 	});
 }
 
@@ -114,11 +120,15 @@ function luoKartallaAlue(data) {
 				e.target.firstElementChild.appendChild(lisattava);
 				lisattava.style.left = String(e.offsetX) + "px";
 				lisattava.style.top = String(e.offsetY) + "px";
-				console.log(lisattava, e.offsetX, e.offsetY);
 			}
 			catch (error) {
 
 			}
+		}
+
+		// jos lisätään joukkue:
+		if (data.startsWith("joukkue")) {
+			lisaaReittiKarttaan(document.getElementById(data));
 		}
 	});
 }
@@ -134,6 +144,8 @@ function luoRastit(data) {
 
 	let lista = Array.from(data.rastit);
 	lista.sort(jarjestaKoodinMukaan);
+
+	document.getElementById("rastit").rastit = lista;
 
 	lista.forEach(function(current, index, list) {
 		let li = document.createElement("li");
@@ -155,6 +167,9 @@ function luoRastit(data) {
 
 		// lisätään listaan
 		ul.appendChild(li);
+/* 
+		// lisätään rastin viite li-elementtiin
+		li.rasti = current; */
 	});
 }
 
@@ -188,6 +203,35 @@ function luoKartanRastit(mymap, data) {
 	return kaikki;
 }
 
+/**
+ * Kun joukkue lisätään Kartalla-alueelle, tämä funktio piirtää karttaan
+ * annetun joukkueen kiertämän reitin piirtona
+ * @param {Object} joukkue joka nyt ei tulekaan objektina vaan li-elementtinä TODO! korjaa
+ */
+function lisaaReittiKarttaan(li) {
+	let joukkue = li.joukkue;
+	console.log(joukkue);
+	let mymap = document.getElementById("map").kartta;
+	console.log(mymap);
+
+	// piirrä rastit
+	let joukkueenrastit = Array.from(joukkue.rastileimaukset);
+	let rastit = document.getElementById("rastit").rastit;
+
+	let piirrettavat = [];
+	joukkueenrastit.forEach((current, index, list) => {
+		let rasti = etsiRastiIdnPerusteella(current.rasti, rastit);
+	});
+}
+
+
+function etsiRastiIdnPerusteella(rastiID, rastit) {
+	for (let rasti of rastit) {
+		if (rasti.id === rastiID) {
+			return rasti;
+		}
+	}
+}
 
 
 // Joukkueen luonnin apufunktioita
