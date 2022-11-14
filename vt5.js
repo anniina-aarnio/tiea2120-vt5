@@ -218,17 +218,29 @@ function lisaaReittiKarttaan(li) {
 	let joukkueenrastit = Array.from(joukkue.rastileimaukset);
 	let rastit = document.getElementById("rastit").rastit;
 
-	let piirrettavat = [];
-	joukkueenrastit.forEach((current, index, list) => {
-		let rasti = etsiRastiIdnPerusteella(current.rasti, rastit);
-	});
+	let reittipisteet = [];
+	
+	for (let i = 0; i < joukkueenrastit.length; i++) {
+		reittipisteet.push(etsiRastiIdnPerusteella(joukkueenrastit[i].rasti, rastit));
+	}
+
+	let reitti = L.polyline(reittipisteet, {color: li.style.backgroundColor}).addTo(mymap);
+/* 	joukkueenrastit.forEach((current, index, list) => {
+		reitti.addLatLng(etsiRastiIdnPerusteella(current.rasti, rastit));
+	}); */
 }
 
 
+/**
+ * 
+ * @param {String} rastiID jossa etsittävän rastin id-numero merkkijonona
+ * @param {Array} rastit kaikki rastit,  
+ * @returns 
+ */
 function etsiRastiIdnPerusteella(rastiID, rastit) {
 	for (let rasti of rastit) {
 		if (rasti.id === rastiID) {
-			return rasti;
+			return [rasti.lat, rasti.lon];
 		}
 	}
 }
