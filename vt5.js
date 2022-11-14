@@ -48,9 +48,10 @@ function luoKartta(data) {
 		key: "0cb805a7-7585-45ee-aa20-6c1a22e636b1"
 	}).addTo(mymap);
 
-	let kulmat = luoKartanRastit(mymap, data);
+	let rastit = luoKartanRastit(mymap, data);
 
-	mymap.fitBounds(kulmat);
+	// kartassa näkyy kaiokki rastit ja vähän padding
+	mymap.fitBounds(rastit, [[1,1], [1,1]]);
 }
 
 /**
@@ -163,8 +164,8 @@ function luoRastit(data) {
  */
 function luoKartanRastit(mymap, data) {
 	let rastit = Array.from(data.rastit);
-	let vasenYla = [rastit[0].lat, rastit[0].lon];
-	let oikeaAla = [rastit[1].lat, rastit[1].lon];
+
+	let kaikki = [];
 
 	rastit.forEach(function(current, index, list) {
 		let circle = L.circle(
@@ -176,17 +177,11 @@ function luoKartanRastit(mymap, data) {
 			}
 		).addTo(mymap);
 
-		// etsitään nurkkarastit
-		if (current.lat < vasenYla[0] && current.lon > vasenYla[1]) {
-			vasenYla[0] = current.lat;
-			vasenYla[1] = current.lon;
-		} else if (current.lat > oikeaAla[0] && current.lon < oikeaAla[1]) {
-			oikeaAla[0] = current.lat;
-			oikeaAla[1] = current.lon;
-		}
+		kaikki.push([current.lat, current.lon]);
+
 	});
 
-	return [vasenYla, oikeaAla];
+	return kaikki;
 }
 
 

@@ -30,6 +30,10 @@ div > div {
    height: 500px;
 }
 
+#kartallalista > li {
+   width: min-content;
+}
+
 ul {
    padding: 0;
    margin: 0;
