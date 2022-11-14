@@ -221,8 +221,13 @@ function lisaaReittiKarttaan(li) {
 	let reittipisteet = [];
 	
 	for (let i = 0; i < joukkueenrastit.length; i++) {
-		reittipisteet.push(etsiRastiIdnPerusteella(joukkueenrastit[i].rasti, rastit));
+		let lisattava = etsiRastiIdnPerusteella(joukkueenrastit[i].rasti, rastit);
+		if (lisattava) {
+			reittipisteet.push(lisattava);
+		}
 	}
+
+	console.log(reittipisteet);
 
 	let reitti = L.polyline(reittipisteet, {color: li.style.backgroundColor}).addTo(mymap);
 /* 	joukkueenrastit.forEach((current, index, list) => {
@@ -240,9 +245,11 @@ function lisaaReittiKarttaan(li) {
 function etsiRastiIdnPerusteella(rastiID, rastit) {
 	for (let rasti of rastit) {
 		if (rasti.id === rastiID) {
+			console.log([rasti.lat, rasti.lon]);
 			return [rasti.lat, rasti.lon];
 		}
 	}
+	return undefined;
 }
 
 
