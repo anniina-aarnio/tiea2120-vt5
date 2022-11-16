@@ -37,6 +37,7 @@ function luoSivu(data) {
  * Luo kartan sivun yläosaan
  * Keskittää näkymän niin, että koko ajan näkyy kaikki rastit,
  * vaikka selaimen koko muuttuisi
+ * @param {Object} data kaikki tiedot joukkueista, rasteista yms
  */
 function luoKartta(data) {
 	let mymap = new L.map('map', {
@@ -91,6 +92,40 @@ function luoJoukkueet(data) {
 		// lisätään joukkueen viittaus li-elementtiin
 		li.joukkue = current;
 	});
+
+	// luodaan droppausalue
+	ul.addEventListener("dragover", (e) => {
+		e.preventDefault();
+
+		dragOverJoukkueTaiRasti(e, "joukkue");
+		/* let data = e.dataTransfer.getData("text");
+		if (data.startsWith("joukkue")) {
+			e.dataTransfer.dropEffect = "move";
+		} else {
+			e.dataTransfer.dropEffect = "none";
+		} */
+
+	});
+
+	ul.parentNode.addEventListener("drop", (e) => {
+		e.preventDefault();
+
+		let data = e.dataTransfer.getData("text");
+		if (data.startsWith("joukkue")) {
+			let li = document.getElementById(data);
+			poistaReittiKartalta(li);
+			ul.appendChild(li);
+		}
+	}, true);
+}
+
+function dragOverJoukkueTaiRasti(e, joukkueTaiRasti) {
+	let data = e.dataTransfer.getData("text");
+	if (data.startsWith("joukkue")) {
+		e.dataTransfer.dropEffect = "move";
+	} else {
+		e.dataTransfer.dropEffect = "none";
+	}
 }
 
 /**
@@ -113,7 +148,6 @@ function luoKartallaAlue(data) {
 		e.preventDefault();
 		let data = e.dataTransfer.getData("text");
 
-		// TODO: tulisiko tähän kohtaan myös karttaan hommelin piirtäminen?
 		if (data) {
 			try {
 				let lisattava = document.getElementById(data);
@@ -126,7 +160,7 @@ function luoKartallaAlue(data) {
 			}
 		}
 
-		// jos lisätään joukkue:
+		// jos lisätään joukkue, lisätään reitti karttaan
 		if (data.startsWith("joukkue")) {
 			lisaaReittiKarttaan(document.getElementById(data));
 		}
@@ -205,14 +239,12 @@ function luoKartanRastit(mymap, data) {
 
 /**
  * Kun joukkue lisätään Kartalla-alueelle, tämä funktio piirtää karttaan
- * annetun joukkueen kiertämän reitin piirtona
- * @param {Object} joukkue joka nyt ei tulekaan objektina vaan li-elementtinä TODO! korjaa
+ * annetun joukkueen kiertämän reitin piirtona TODO jatka tätä
+ * @param {Node} li joukkueen li-elementti
  */
 function lisaaReittiKarttaan(li) {
 	let joukkue = li.joukkue;
-	console.log(joukkue);
 	let mymap = document.getElementById("map").kartta;
-	console.log(mymap);
 
 	// piirrä rastit
 	let joukkueenrastit = Array.from(joukkue.rastileimaukset);
@@ -227,12 +259,20 @@ function lisaaReittiKarttaan(li) {
 		}
 	}
 
-	console.log(reittipisteet);
-
+	// nyt luo aina uudestaan reitin - pitäisikö luoda suoraan kaikille joukkueille reitit,
+	// jotka näytettäisiin tai poistettaisiin näkyvistä ?
 	let reitti = L.polyline(reittipisteet, {color: li.style.backgroundColor}).addTo(mymap);
 /* 	joukkueenrastit.forEach((current, index, list) => {
 		reitti.addLatLng(etsiRastiIdnPerusteella(current.rasti, rastit));
 	}); */
+}
+
+/**
+ * TODO selosta + tee funktio kuntoon
+ * @param {Object} li 
+ */
+function poistaReittiKartalta(li) {
+	console.log(li, "poistettu");
 }
 
 
@@ -245,7 +285,6 @@ function lisaaReittiKarttaan(li) {
 function etsiRastiIdnPerusteella(rastiID, rastit) {
 	for (let rasti of rastit) {
 		if (rasti.id === rastiID) {
-			console.log([rasti.lat, rasti.lon]);
 			return [rasti.lat, rasti.lon];
 		}
 	}
