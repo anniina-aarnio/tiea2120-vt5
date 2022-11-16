@@ -98,13 +98,6 @@ function luoJoukkueet(data) {
 		e.preventDefault();
 
 		dragOverJoukkueTaiRasti(e, "joukkue");
-		/* let data = e.dataTransfer.getData("text");
-		if (data.startsWith("joukkue")) {
-			e.dataTransfer.dropEffect = "move";
-		} else {
-			e.dataTransfer.dropEffect = "none";
-		} */
-
 	});
 
 	ul.parentNode.addEventListener("drop", (e) => {
@@ -121,7 +114,7 @@ function luoJoukkueet(data) {
 
 function dragOverJoukkueTaiRasti(e, joukkueTaiRasti) {
 	let data = e.dataTransfer.getData("text");
-	if (data.startsWith("joukkue")) {
+	if (data.startsWith(joukkueTaiRasti)) {
 		e.dataTransfer.dropEffect = "move";
 	} else {
 		e.dataTransfer.dropEffect = "none";
@@ -204,6 +197,12 @@ function luoRastit(data) {
 /* 
 		// lisätään rastin viite li-elementtiin
 		li.rasti = current; */
+	});
+
+	ul.addEventListener("dragover", (e) => {
+		e.preventDefault();
+
+		dragOverJoukkueTaiRasti(e, "rasti");
 	});
 }
 
