@@ -96,20 +96,13 @@ function luoJoukkueet(data) {
 	// luodaan droppausalue
 	ul.addEventListener("dragover", (e) => {
 		e.preventDefault();
-
 		dragOverJoukkueTaiRasti(e, "joukkue");
 	});
 
 	ul.parentNode.addEventListener("drop", (e) => {
 		e.preventDefault();
-
-		let data = e.dataTransfer.getData("text");
-		if (data.startsWith("joukkue")) {
-			let li = document.getElementById(data);
-			poistaReittiKartalta(li);
-			ul.appendChild(li);
-		}
-	}, true);
+		ul.appendChild(dropJoukkueTaiRasti(e, "joukkue"));
+	});
 }
 
 function dragOverJoukkueTaiRasti(e, joukkueTaiRasti) {
@@ -118,6 +111,18 @@ function dragOverJoukkueTaiRasti(e, joukkueTaiRasti) {
 		e.dataTransfer.dropEffect = "move";
 	} else {
 		e.dataTransfer.dropEffect = "none";
+	}
+}
+
+function dropJoukkueTaiRasti(e, joukkueTaiRasti) {
+	let data = e.dataTransfer.getData("text");
+	if (data.startsWith("joukkue")) {
+		let li = document.getElementById(data);
+		poistaReittiKartalta(li);
+		return li;
+	} else if (data.startsWith("rasti")) {
+		let li = document.getElementById(data);
+		return li;
 	}
 }
 
@@ -199,10 +204,15 @@ function luoRastit(data) {
 		li.rasti = current; */
 	});
 
+	// droppausalue rasteille
 	ul.addEventListener("dragover", (e) => {
 		e.preventDefault();
-
 		dragOverJoukkueTaiRasti(e, "rasti");
+	});
+
+	ul.addEventListener("drop", (e) => {
+		e.preventDefault();
+		ul.appendChild(dropJoukkueTaiRasti(e, "rasti"));
 	});
 }
 
