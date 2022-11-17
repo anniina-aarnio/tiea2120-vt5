@@ -228,7 +228,7 @@ function dropJoukkueTaiRasti(e, joukkueTaiRasti) {
 // Kartan luonnin apufunktioita
 
 /**
- * 
+ * Luo karttaan kaikki datan rastit-listauksen rastit punaisina ympyröinä
  * @param {Object} mymap, johon rastien merkit liitetään
  * @param {Object} data, josta rastit
  */
@@ -256,25 +256,23 @@ function luoKartanRastit(mymap, data) {
 
 /**
  * Kun joukkue lisätään Kartalla-alueelle, tämä funktio piirtää karttaan
- * annetun joukkueen kiertämän reitin piirtona TODO jatka tätä
+ * annetun joukkueen kiertämän reitin piirtona
+ * Funktiossa tarkistetaan soveltuvat reittipisteet
  * @param {Node} li joukkueen li-elementti
  */
 function lisaaReittiKarttaan(li) {
 	let joukkue = li.joukkue;
 	let mymap = document.getElementById("map").kartta;
 
-	// piirrä rastit
-	let joukkueenrastit = Array.from(joukkue.rastileimaukset);
+	// katsotaan validit rastit reittipistelistaksi
+	let reittipisteet = lisaaValiditRastileimaukset(Array.from(joukkue.rastileimaukset));
+	
+	// jos reittipisteet on tyhjä lista, palataan piirtämättä mitään
+	if (reittipisteet.length == 0) {
+		return;
+	}
 
-	let reittipisteet = lisaaValiditRastileimaukset(joukkueenrastit);
-
-	// nyt luo aina uudestaan reitin - pitäisikö luoda suoraan kaikille joukkueille reitit,
-	// jotka näytettäisiin tai poistettaisiin näkyvistä ?
-	if (reittipisteet.length == 0) { return; }
-	let reitti = L.polyline(reittipisteet, {color: li.style.backgroundColor}).addTo(mymap);
-/* 	joukkueenrastit.forEach((current, index, list) => {
-		reitti.addLatLng(etsiRastiIdnPerusteella(current.rasti, rastit));
-	}); */
+	L.polyline(reittipisteet, {color: li.style.backgroundColor}).addTo(mymap);
 }
 
 /**
@@ -286,28 +284,14 @@ function poistaReittiKartalta(li) {
 }
 
 
-/**
- * 
- * @param {String} rastiID jossa etsittävän rastin id-numero merkkijonona
- * @param {Array} rastit kaikki rastit,  
- * @returns 
- */
-function etsiRastiIdnPerusteella(rastiID, rastit) {
-	for (let rasti of rastit) {
-		if (rasti.id === rastiID) {
-			return [rasti.lat, rasti.lon];
-		}
-	}
-	return undefined;
-}
-
-
 // Joukkueen luonnin apufunktioita
 
 /**
  * Apufunktio joukkueen jäsenten järjestämiseen (sort)
+ * Tavallinen aakkosjärjestys
  * @param {Object} a joukkue 
  * @param {Object} b toinen joukkue
+ * @return -1 jos b ennen a, 1 jos a ennen b, 0 jos samat
  */
 function jarjestaNimenMukaan(a, b) {
 	if (a.nimi.trim().toUpperCase() > b.nimi.trim().toUpperCase()) {
@@ -324,10 +308,10 @@ function jarjestaNimenMukaan(a, b) {
 
 /**
  * Järjestysfunktio, jolla rastit järjestetään koodin mukaan
- * käänteisessä järjestyksessä
+ * käänteisessä aakkosjärjestyksessä
  * @param {Object} a rasti 
  * @param {Object} b toinen rasti
- * @returns -1 jos a:n koodi on suurempaa kuin b, 1 jos b suurempi kuin a, 0 jos samat 
+ * @returns -1 jos a tulee ennen b, 1 jos b tulee ennen a, 0 jos samat 
  */
 function jarjestaKoodinMukaan(a, b) {
 	if (a.koodi.trim().toUpperCase() > b.koodi.trim().toUpperCase()) {
@@ -393,9 +377,16 @@ function lisaaValiditRastileimaukset(joukkueenrastit) {
 }
 
 
-
 // Muita apufunktioita
 
+/**
+ * Järjestää objekti.aika -perusteella listan järjestykseen, jossa
+ * aikaisempi aika tulee ensin, jälkimmäinen sitten
+ * Tässä oletetaan että aika on merkkijonona "vvvv.kk.pp hh:mm:ss"-muodossa
+ * @param {Object} a objekti, jolla aika-tieto (esim. joukkueen rastileimaus)
+ * @param {Object} b objekti, jolla aika-tieto (esim. joukkueen rastileimaus)
+ * @returns -1 jos a ennen b, 1 jos b ennen a, 0 jos samat
+ */
 function jarjestaAjanMukaan(a, b) {
 	if (a.aika < b.aika) {
 		return -1;
@@ -406,6 +397,14 @@ function jarjestaAjanMukaan(a, b) {
 	return 0;
 }
 
+/**
+ * Luo sateenkaaren värit listalle punainen -> keltainen -> sininen -> punainen
+ * väliväreineen sen perusteella, montako väriä tarvitaan (listassa osia) ja
+ * monesko väri niistä pitää palauttaa.
+ * @param {Number} numOfSteps 
+ * @param {Number} step 
+ * @returns väri #rrggbb -muodossa 
+ */
 function rainbow(numOfSteps, step) {
     // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
     // Adam Cole, 2011-Sept-14
@@ -424,5 +423,5 @@ function rainbow(numOfSteps, step) {
         case 5: r = 1; g = 0; b = q; break;
     }
     let c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
-    return (c);
+	return (c);
 }
