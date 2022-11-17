@@ -9,6 +9,13 @@ window.addEventListener("load", function(e) {
 	    .then(function(data) {
             console.log(data);
             // tänne oma koodi
+
+			// lisätään viite rasteihin dokumenttiin
+			let rastimap = new Map();
+			data.rastit.forEach((current, index, list) => {
+				rastimap.set(current.id, current);
+			});
+			document.getElementById("rastit").rastit = rastimap;
 			luoSivu(data);
 	    });
 });
@@ -105,27 +112,6 @@ function luoJoukkueet(data) {
 	});
 }
 
-function dragOverJoukkueTaiRasti(e, joukkueTaiRasti) {
-	let data = e.dataTransfer.getData("text");
-	if (data.startsWith(joukkueTaiRasti)) {
-		e.dataTransfer.dropEffect = "move";
-	} else {
-		e.dataTransfer.dropEffect = "none";
-	}
-}
-
-function dropJoukkueTaiRasti(e, joukkueTaiRasti) {
-	let data = e.dataTransfer.getData("text");
-	if (data.startsWith("joukkue")) {
-		let li = document.getElementById(data);
-		poistaReittiKartalta(li);
-		return li;
-	} else if (data.startsWith("rasti")) {
-		let li = document.getElementById(data);
-		return li;
-	}
-}
-
 /**
  * Luo kartalla-alueen, joka on droppable-area
  * @param {Object} data 
@@ -177,8 +163,6 @@ function luoRastit(data) {
 	let lista = Array.from(data.rastit);
 	lista.sort(jarjestaKoodinMukaan);
 
-	document.getElementById("rastit").rastit = lista;
-
 	lista.forEach(function(current, index, list) {
 		let li = document.createElement("li");
 		li.textContent = current.koodi;
@@ -214,6 +198,30 @@ function luoRastit(data) {
 		e.preventDefault();
 		ul.appendChild(dropJoukkueTaiRasti(e, "rasti"));
 	});
+}
+
+
+// Droppaukseen liittyviä apufunktioita
+
+function dragOverJoukkueTaiRasti(e, joukkueTaiRasti) {
+	let data = e.dataTransfer.getData("text");
+	if (data.startsWith(joukkueTaiRasti)) {
+		e.dataTransfer.dropEffect = "move";
+	} else {
+		e.dataTransfer.dropEffect = "none";
+	}
+}
+
+function dropJoukkueTaiRasti(e, joukkueTaiRasti) {
+	let data = e.dataTransfer.getData("text");
+	if (data.startsWith("joukkue")) {
+		let li = document.getElementById(data);
+		poistaReittiKartalta(li);
+		return li;
+	} else if (data.startsWith("rasti")) {
+		let li = document.getElementById(data);
+		return li;
+	}
 }
 
 
@@ -257,19 +265,12 @@ function lisaaReittiKarttaan(li) {
 
 	// piirrä rastit
 	let joukkueenrastit = Array.from(joukkue.rastileimaukset);
-	let rastit = document.getElementById("rastit").rastit;
 
-	let reittipisteet = [];
-	
-	for (let i = 0; i < joukkueenrastit.length; i++) {
-		let lisattava = etsiRastiIdnPerusteella(joukkueenrastit[i].rasti, rastit);
-		if (lisattava) {
-			reittipisteet.push(lisattava);
-		}
-	}
+	let reittipisteet = lisaaValiditRastileimaukset(joukkueenrastit);
 
 	// nyt luo aina uudestaan reitin - pitäisikö luoda suoraan kaikille joukkueille reitit,
 	// jotka näytettäisiin tai poistettaisiin näkyvistä ?
+	if (reittipisteet.length == 0) { return; }
 	let reitti = L.polyline(reittipisteet, {color: li.style.backgroundColor}).addTo(mymap);
 /* 	joukkueenrastit.forEach((current, index, list) => {
 		reitti.addLatLng(etsiRastiIdnPerusteella(current.rasti, rastit));
@@ -319,8 +320,15 @@ function jarjestaNimenMukaan(a, b) {
 }
 
 
-// Rastien luonnin apufunktioita
+// Kartan rastien apufunktioita
 
+/**
+ * Järjestysfunktio, jolla rastit järjestetään koodin mukaan
+ * käänteisessä järjestyksessä
+ * @param {Object} a rasti 
+ * @param {Object} b toinen rasti
+ * @returns -1 jos a:n koodi on suurempaa kuin b, 1 jos b suurempi kuin a, 0 jos samat 
+ */
 function jarjestaKoodinMukaan(a, b) {
 	if (a.koodi.trim().toUpperCase() > b.koodi.trim().toUpperCase()) {
 		return -1;
@@ -331,8 +339,51 @@ function jarjestaKoodinMukaan(a, b) {
 	return 0;
 }
 
+/**
+ * 
+ * @param {Array} joukkueenrastit 
+ */
+function lisaaValiditRastileimaukset(joukkueenrastit) {
+	let palautettava = [];
+	let rastit = document.getElementById("rastit").rastit;
+
+	let osaMatkaa = false;
+
+	joukkueenrastit.sort((a, b) => jarjestaAjanMukaan(a, b));
+
+	for (let i = 0; i < joukkueenrastit.length; i++) {
+		let rastiID = joukkueenrastit[i].rasti;
+		if (osaMatkaa) {
+			if (rastiID) {
+				let rasti = rastit.get(rastiID);
+				let lat = rasti.lat;
+				let lon = rasti.lon;
+				palautettava.push([lat, lon]);
+				if (rasti.koodi === "MAALI") {
+					return palautettava;
+				}
+			}
+		} else if (rastit.get(rastiID).koodi === "LAHTO") {
+			osaMatkaa = true;
+		}
+	}
+	return [];
+
+}
+
+
 
 // Muita apufunktioita
+
+function jarjestaAjanMukaan(a, b) {
+	if (a.aika < b.aika) {
+		return -1;
+	}
+	if (b.aika < a.aika) {
+		return 1;
+	}
+	return 0;
+}
 
 function rainbow(numOfSteps, step) {
     // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
