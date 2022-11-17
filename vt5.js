@@ -340,8 +340,12 @@ function jarjestaKoodinMukaan(a, b) {
 }
 
 /**
- * 
+ * Tekee listan, jossa joukkueen mukaanlaskettavat rastit
+ * - viimeinen LÄHTÖ-leimaus on 1. rasti
+ * - kaikki välirastit uniikkeja
+ * - ensimmäinen MAALI-leimaus on viimeinen rasti
  * @param {Array} joukkueenrastit 
+ * @return lista koordinaateista esim. [[lat1, lon1], [lat2, lon2]]
  */
 function lisaaValiditRastileimaukset(joukkueenrastit) {
 	let palautettava = [];
@@ -349,26 +353,43 @@ function lisaaValiditRastileimaukset(joukkueenrastit) {
 
 	let osaMatkaa = false;
 
+	// järjestetään ajan mukaan
 	joukkueenrastit.sort((a, b) => jarjestaAjanMukaan(a, b));
 
+	// lisätään palautettavaan listaan
 	for (let i = 0; i < joukkueenrastit.length; i++) {
 		let rastiID = joukkueenrastit[i].rasti;
-		if (osaMatkaa) {
-			if (rastiID) {
-				let rasti = rastit.get(rastiID);
-				let lat = rasti.lat;
-				let lon = rasti.lon;
-				palautettava.push([lat, lon]);
-				if (rasti.koodi === "MAALI") {
-					return palautettava;
-				}
+		let rasti = rastit.get(rastiID);
+
+		// jos rastiID tai rasti on undefined mennään seuraavaan rastiin
+		if (!rastiID || !rasti) {
+			continue;
+		}
+
+		// LÄHTÖ-rasti tai sen jälkeinen rasti
+		if (osaMatkaa || rasti.koodi === "LAHTO") {
+
+			// jos on LÄHTÖ-rasti (eka tai mikä vaan)
+			if (rasti.koodi === "LAHTO") {
+				palautettava = [];
+				osaMatkaa = true;
 			}
-		} else if (rastit.get(rastiID).koodi === "LAHTO") {
-			osaMatkaa = true;
+
+			// onko validi rastiID (ei undefined)
+
+			let lat = rasti.lat;
+			let lon = rasti.lon;
+			palautettava.push([lat, lon]);
+
+			// jos ollaan maalissa, sekin rasti on lisätty ja sitten palautetaan
+			if (rasti.koodi === "MAALI") {
+				return palautettava;
+			}
 		}
 	}
-	return [];
 
+	// palautetaan tyhjä lista, jos maalia ei tule tai muuten epäkelpo lista
+	return [];
 }
 
 
