@@ -66,7 +66,7 @@ function luoKartta(data) {
 }
 
 /**
- * Luo joukkuelistauksen datan perusteella aakkosjärjestykseen
+ * Luo joukkuelistauksen sivulle datan perusteella aakkosjärjestykseen
  * @param {Object} data, josta joukkueen tiedot haetaan
  */
 function luoJoukkueet(data) {
@@ -75,13 +75,14 @@ function luoJoukkueet(data) {
 	let lista = Array.from(data.joukkueet);
 	lista.sort(jarjestaNimenMukaan);
 
+	// jokaiselle listan osalle tehdään sama
 	lista.forEach(function(current, index, list) {
 		let li = document.createElement("li");
 		li.textContent = current.nimi;
 		li.style.backgroundColor = rainbow(lista.length, index);
 		li.id = "joukkue" + (index + 1);
 		
-		// raahailu
+		// raahailu-tapahtumat
 		li.setAttribute("draggable", "true");
 		li.addEventListener("dragstart", (e) => {
 			e.dataTransfer.setData("text/plain", "joukkue" + (index + 1));
@@ -272,7 +273,9 @@ function lisaaReittiKarttaan(li) {
 		return;
 	}
 
-	L.polyline(reittipisteet, {color: li.style.backgroundColor}).addTo(mymap);
+	let reitti = L.polyline(reittipisteet, {color: li.style.backgroundColor}).addTo(mymap);
+	li.reitti = reitti;
+	console.log(reitti);
 }
 
 /**
@@ -280,7 +283,7 @@ function lisaaReittiKarttaan(li) {
  * @param {Object} li 
  */
 function poistaReittiKartalta(li) {
-	console.log(li, "poistettu");
+	li.reitti.remove();
 }
 
 
