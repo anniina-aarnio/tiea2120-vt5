@@ -48,10 +48,10 @@ ul {
 }
 
 .leaflet-tooltip-pane .koodi-kartalla {
-   color: red;
+   color: darkslategrey;
    font-weight: bold;
    background: transparent;
    border: 0;
    box-shadow: none;
-   font-size: absolute 15px;
+   font-size: absolute 20px;
 }

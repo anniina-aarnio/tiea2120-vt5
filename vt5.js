@@ -237,11 +237,11 @@ function luoKartanRastit(mymap, data) {
 		let text = L.tooltip({
 			permanent: true,
 			direction: "center",
-			className: "koodi-kartalla"
+			className: "koodi-kartalla",
+			offset: [-5, -5]
 		})
-		.setContent(current.koodi)
-		.setLatLng([current.lat, current.lon]);
-		circle.bindTooltip(text).openTooltip();
+		.setContent(current.koodi);
+		circle.bindTooltip(text);
 
 		//TODO: lisää jokaiseen circleen rastin nimi
 		console.log(circle);
