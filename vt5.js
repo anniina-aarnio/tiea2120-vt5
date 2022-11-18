@@ -92,12 +92,13 @@ function luoJoukkueetTaiRastit(data, joukkueTaiRasti) {
 		return;
 	}
 
+	// luodaan listan jokaisesta alkiosta li-elementti ja lisätään listaan
 	lista.forEach(function(current, index, list) {
 		let li = document.createElement("li");
 
 		// joukkueen nimi ja viite joukkueeseen
 		if (joukkueTaiRasti == "joukkue") {
-			li.textContent = current.nimi;
+			li.textContent = current.nimi + " (" + laskeJoukkueenMatka(current).toFixed(1) + " km)";
 			li.joukkue = current;
 
 		// rastin nimi
@@ -417,114 +418,51 @@ function rainbow(numOfSteps, step) {
 }
 
 /**
- * 
- * @param {Object} joukkue 
+ * Laskee joukkueen kulkeman matkan kilometreissä
+ * Laskee kunkin rastin välisen matkan ja palauttaa niiden summan
+ * @param {Object} joukkue
+ * @return kokonaismatka kilometreissä, ei pyöristettynä
  */
 function laskeJoukkueenMatka(joukkue) {
 	let matkanRastit = lisaaValiditRastileimaukset(joukkue.rastileimaukset);
+	if (matkanRastit <= 1) {
+		return 0.0;
+	}
 
+	let kokonaismatka = 0.0;
+	let edellinen = matkanRastit[0];
+
+	for (let i = 1; i < matkanRastit.length; i++) {
+		let nyt = matkanRastit[i];
+		kokonaismatka += getDistanceFromLatLonInKm(edellinen[0], edellinen[1], nyt[0], nyt[1]);
+		edellinen = nyt;
+	}
+
+	return kokonaismatka;
 }
 
-
-
-/** VANHA VERSIO, EI KÄYTÖSSÄ TODO: poista
- * Luo rastilistauksen datan perusteella aakkosjärjestykseen
- * @param {Object} data, josta rastien tiedot haetaan
+/**
+ * Funktio otettu käyttöön viikkotehtävä 1 valmiista funktiosta
+ * Laskee kahden pisteen välisen etäisyyden
  */
- function luoRastit1(data) {
-	let ul = document.getElementById("rastilista");
-
-	let lista = Array.from(data.rastit);
-	lista.sort(jarjestaKoodinMukaan);
-
-	lista.forEach(function(current, index, list) {
-		let li = document.createElement("li");
-		li.textContent = current.koodi;
-		li.style.backgroundColor = rainbow(lista.length, index);
-		li.id = "rasti" + (index + 1);
-		
-		// raahailu
-		li.setAttribute("draggable", "true");
-		li.addEventListener("dragstart", (e) => {
-			e.dataTransfer.setData("text/plain", "rasti" + (index + 1));
-			e.dataTransfer.effectAllowed = 'move';
-			e.target.className = "dragging";
-		});
-		li.addEventListener("dragend", (e) => {
-			// poistaa dragging-classin targetilta
-			e.target.classList.remove("dragging");
-		});
-
-		// lisätään listaan
-		ul.appendChild(li);
-/* 
-		// lisätään rastin viite li-elementtiin
-		li.rasti = current; */
-	});
-
-	// droppausalue rasteille
-	ul.parentNode.addEventListener("dragover", (e) => {
-		e.preventDefault();
-		dragOverJoukkueTaiRasti(e, "rasti");
-	});
-
-	ul.parentNode.addEventListener("drop", (e) => {
-		e.preventDefault();
-		ul.appendChild(dropJoukkueTaiRasti(e, "rasti"));
-	});
+function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+	let R = 6371; // Radius of the earth in km
+	let dLat = deg2rad(lat2-lat1);  // deg2rad below
+	let dLon = deg2rad(lon2-lon1);
+	let a =
+		Math.sin(dLat/2) * Math.sin(dLat/2) +
+		Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+		Math.sin(dLon/2) * Math.sin(dLon/2)
+		;
+	let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	let d = R * c; // Distance in km
+	return d;
 }
 
-/** VANHA VERSIO, EI KÄYTÖSSÄ TODO: poista
- * Luo joukkuelistauksen sivulle datan perusteella aakkosjärjestykseen
- * @param {Object} data, josta joukkueen tiedot haetaan
+/**
+ * Funktio otettu käyttöön viikkotehtävä 1 valmiista funktiosta
+ * Muuntaa asteet radiaaneiksi
  */
- function luoJoukkueet1(data) {
-	let ul = document.getElementById("joukkuelista");
-
-	let lista = Array.from(data.joukkueet);
-	lista.sort(jarjestaNimenMukaan);
-
-	// jokaiselle listan osalle tehdään sama
-	lista.forEach(function(current, index, list) {
-		let li = document.createElement("li");
-		li.textContent = current.nimi;
-		li.style.backgroundColor = rainbow(lista.length, index);
-		li.id = "joukkue" + (index + 1);
-		
-		// raahailu-tapahtumat
-		li.setAttribute("draggable", "true");
-		li.addEventListener("dragstart", (e) => {
-			e.dataTransfer.setData("text/plain", "joukkue" + (index + 1));
-			e.dataTransfer.effectAllowed = 'move';
-			e.target.className = "dragging";
-		});
-		li.addEventListener("dragend", (e) => {
-			// poistaa dragging-classin targetilta
-			e.target.classList.remove("dragging");
-		});
-
-		// lisätään listaan
-		ul.appendChild(li);
-
-		// lisätään joukkueen viittaus li-elementtiin
-		li.joukkue = current;
-	});
-
-	// luodaan droppausalue diville
-	ul.parentNode.addEventListener("dragover", (e) => {
-		e.preventDefault();
-		dragOverJoukkueTaiRasti(e, "joukkue");
-	});
-
-	ul.parentNode.addEventListener("drop", (e) => {
-		e.preventDefault();
-
-		let node = e.target;
-		// jos bubblen kautta päätyy li-elementtiin:
-		if (node.nodeName == "LI") {
-			ul.insertBefore(dropJoukkueTaiRasti(e, "joukkue"), e.target);
-		} else {
-			ul.appendChild(dropJoukkueTaiRasti(e, "joukkue"));
-		}
-	});
+function deg2rad(deg) {
+	return deg * (Math.PI/180);
 }
