@@ -229,15 +229,24 @@ function luoKartanRastit(mymap, data) {
 			[current.lat, current.lon], {
 				color: "red",
 				fillColor: "red",
-				fillOpacity: 0.5,
+				fillOpacity: 0.1,
 				radius: 150
 			}
 		).addTo(mymap);
 
+		let text = L.tooltip({
+			permanent: true,
+			direction: "center",
+			className: "koodi-kartalla"
+		})
+		.setContent(current.koodi)
+		.setLatLng([current.lat, current.lon]);
+		circle.bindTooltip(text).openTooltip();
+
 		//TODO: lisää jokaiseen circleen rastin nimi
+		console.log(circle);
 
 		kaikki.push([current.lat, current.lon]);
-
 	});
 
 	return kaikki;

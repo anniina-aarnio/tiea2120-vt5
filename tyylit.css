@@ -46,3 +46,12 @@ ul {
 #rastilista {
    column-count: 4;
 }
+
+.leaflet-tooltip-pane .koodi-kartalla {
+   color: red;
+   font-weight: bold;
+   background: transparent;
+   border: 0;
+   box-shadow: none;
+   font-size: absolute 15px;
+}
