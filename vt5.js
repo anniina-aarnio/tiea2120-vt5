@@ -101,7 +101,7 @@ function luoJoukkueet(data) {
 		li.joukkue = current;
 	});
 
-	// luodaan droppausalue 
+	// luodaan droppausalue diville
 	ul.parentNode.addEventListener("dragover", (e) => {
 		e.preventDefault();
 		dragOverJoukkueTaiRasti(e, "joukkue");
@@ -109,7 +109,15 @@ function luoJoukkueet(data) {
 
 	ul.parentNode.addEventListener("drop", (e) => {
 		e.preventDefault();
-		ul.appendChild(dropJoukkueTaiRasti(e, "joukkue"));
+
+		let node = e.target;
+		// jos bubblen kautta päätyy li-elementtiin:
+		if (node.nodeName == "LI") {
+			ul.insertBefore(dropJoukkueTaiRasti(e, "joukkue"), e.target);
+		} else {
+			ul.appendChild(dropJoukkueTaiRasti(e, "joukkue"));
+		}
+
 	});
 }
 
@@ -190,12 +198,12 @@ function luoRastit(data) {
 	});
 
 	// droppausalue rasteille
-	ul.addEventListener("dragover", (e) => {
+	ul.parentNode.addEventListener("dragover", (e) => {
 		e.preventDefault();
 		dragOverJoukkueTaiRasti(e, "rasti");
 	});
 
-	ul.addEventListener("drop", (e) => {
+	ul.parentNode.addEventListener("drop", (e) => {
 		e.preventDefault();
 		ul.appendChild(dropJoukkueTaiRasti(e, "rasti"));
 	});
@@ -284,7 +292,9 @@ function lisaaReittiKarttaan(li) {
  * @param {Object} li 
  */
 function poistaReittiKartalta(li) {
-	li.reitti.remove();
+	if (li.reitti) {
+		li.reitti.remove();
+	}
 }
 
 
