@@ -101,8 +101,8 @@ function luoJoukkueet(data) {
 		li.joukkue = current;
 	});
 
-	// luodaan droppausalue
-	ul.addEventListener("dragover", (e) => {
+	// luodaan droppausalue 
+	ul.parentNode.addEventListener("dragover", (e) => {
 		e.preventDefault();
 		dragOverJoukkueTaiRasti(e, "joukkue");
 	});
@@ -247,6 +247,8 @@ function luoKartanRastit(mymap, data) {
 				radius: 150
 			}
 		).addTo(mymap);
+
+		//TODO: lisää jokaiseen circleen rastin nimi
 
 		kaikki.push([current.lat, current.lon]);
 
@@ -426,4 +428,13 @@ function rainbow(numOfSteps, step) {
     }
     let c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
 	return (c);
+}
+
+/**
+ * 
+ * @param {Object} joukkue 
+ */
+function laskeJoukkueenMatka(joukkue) {
+	let matkanRastit = lisaaValiditRastileimaukset(joukkue.rastileimaukset);
+
 }
