@@ -98,7 +98,8 @@ function luoJoukkueetTaiRastit(data, joukkueTaiRasti) {
 
 		// joukkueen nimi ja viite joukkueeseen
 		if (joukkueTaiRasti == "joukkue") {
-			li.textContent = current.nimi + " (" + laskeJoukkueenMatka(current).toFixed(1) + " km)";
+			current.matka = laskeJoukkueenMatka(current).toFixed(1);
+			li.textContent = current.nimi + " (" + current.matka + " km)";
 			li.joukkue = current;
 
 		// rastin nimi
