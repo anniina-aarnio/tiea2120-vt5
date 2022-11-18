@@ -275,11 +275,10 @@ function lisaaReittiKarttaan(li) {
 
 	let reitti = L.polyline(reittipisteet, {color: li.style.backgroundColor}).addTo(mymap);
 	li.reitti = reitti;
-	console.log(reitti);
 }
 
 /**
- * TODO selosta + tee funktio kuntoon
+ * Poistaa annetun joukkue-li-elementin reitin kartalta
  * @param {Object} li 
  */
 function poistaReittiKartalta(li) {

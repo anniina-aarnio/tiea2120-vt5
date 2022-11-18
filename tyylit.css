@@ -19,7 +19,7 @@ div > div {
 
 #otsikot, #alaosa {
    display: grid;
-   grid-template-columns: 1fr 800px 1fr;
+   grid-template-columns: 1fr 600px 1fr;
 }
 
 #alaosa {
@@ -27,7 +27,7 @@ div > div {
 }
 
 #kartalla {
-   height: 500px;
+   height: 400px;
    position: relative;
 }
 
