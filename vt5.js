@@ -35,9 +35,9 @@ window.addEventListener("load", function(e) {
  */
 function luoSivu(data) {
 	luoKartta(data);
-	luoJoukkueet(data);
+	luoJoukkueetTaiRastit(data, "joukkue");
 	luoKartallaAlue(data);
-	luoRastit(data);
+	luoJoukkueetTaiRastit(data, "rasti");
 }
 
 /**
@@ -66,26 +66,53 @@ function luoKartta(data) {
 }
 
 /**
- * Luo joukkuelistauksen sivulle datan perusteella aakkosjärjestykseen
- * @param {Object} data, josta joukkueen tiedot haetaan
+ * Luo sivulle sateenkaaren väreissä joukkue- tai rastilistauksen
+ * Luo järjestämättömän listan (ul), johon lisää aakkosjärjestyksessä 
+ * @param {Object} data josta tieto listan sisältöihin otetaan
+ * @param {String} joukkueTaiRasti tieto, onko kyseessä joukkue vai rasti
  */
-function luoJoukkueet(data) {
-	let ul = document.getElementById("joukkuelista");
+function luoJoukkueetTaiRastit(data, joukkueTaiRasti) {
+	let ul;
+	let lista;
 
-	let lista = Array.from(data.joukkueet);
-	lista.sort(jarjestaNimenMukaan);
+	// joukkueen ul ja lista omansa
+	if (joukkueTaiRasti == "joukkue") {
+		ul = document.getElementById("joukkuelista");
+		lista = Array.from(data.joukkueet);
+		// aakkosjärjestys
+		lista.sort(jarjestaNimenMukaan);
+	
+	// rastin ul ja lista omansa
+	} else if (joukkueTaiRasti == "rasti") {
+		ul = document.getElementById("rastilista");
+		lista = Array.from(data.rastit);
+		// käänteinen aakkosjärjestys 
+		lista.sort(jarjestaKoodinMukaan);
+	} else {
+		return;
+	}
 
-	// jokaiselle listan osalle tehdään sama
 	lista.forEach(function(current, index, list) {
 		let li = document.createElement("li");
-		li.textContent = current.nimi;
+
+		// joukkueen nimi ja viite joukkueeseen
+		if (joukkueTaiRasti == "joukkue") {
+			li.textContent = current.nimi;
+			li.joukkue = current;
+
+		// rastin nimi
+		} else {
+			li.textContent = current.koodi;
+		}
+
+		// li-elementin taustaväri ja id
 		li.style.backgroundColor = rainbow(lista.length, index);
-		li.id = "joukkue" + (index + 1);
+		li.id = joukkueTaiRasti + (index + 1);
 		
-		// raahailu-tapahtumat
+		// raahailu
 		li.setAttribute("draggable", "true");
 		li.addEventListener("dragstart", (e) => {
-			e.dataTransfer.setData("text/plain", "joukkue" + (index + 1));
+			e.dataTransfer.setData("text/plain", joukkueTaiRasti + (index + 1));
 			e.dataTransfer.effectAllowed = 'move';
 			e.target.className = "dragging";
 		});
@@ -97,14 +124,12 @@ function luoJoukkueet(data) {
 		// lisätään listaan
 		ul.appendChild(li);
 
-		// lisätään joukkueen viittaus li-elementtiin
-		li.joukkue = current;
 	});
 
-	// luodaan droppausalue diville
+	// diville droppausalue joukkueille tai rasteille
 	ul.parentNode.addEventListener("dragover", (e) => {
 		e.preventDefault();
-		dragOverJoukkueTaiRasti(e, "joukkue");
+		dragOverJoukkueTaiRasti(e, joukkueTaiRasti);
 	});
 
 	ul.parentNode.addEventListener("drop", (e) => {
@@ -113,11 +138,10 @@ function luoJoukkueet(data) {
 		let node = e.target;
 		// jos bubblen kautta päätyy li-elementtiin:
 		if (node.nodeName == "LI") {
-			ul.insertBefore(dropJoukkueTaiRasti(e, "joukkue"), e.target);
+			ul.insertBefore(dropJoukkueTaiRasti(e, joukkueTaiRasti), e.target);
 		} else {
-			ul.appendChild(dropJoukkueTaiRasti(e, "joukkue"));
+			ul.appendChild(dropJoukkueTaiRasti(e, joukkueTaiRasti));
 		}
-
 	});
 }
 
@@ -160,54 +184,6 @@ function luoKartallaAlue(data) {
 	});
 }
 
-
-
-/**
- * Luo rastilistauksen datan perusteella aakkosjärjestykseen
- * @param {Object} data, josta rastien tiedot haetaan
- */
-function luoRastit(data) {
-	let ul = document.getElementById("rastilista");
-
-	let lista = Array.from(data.rastit);
-	lista.sort(jarjestaKoodinMukaan);
-
-	lista.forEach(function(current, index, list) {
-		let li = document.createElement("li");
-		li.textContent = current.koodi;
-		li.style.backgroundColor = rainbow(lista.length, index);
-		li.id = "rasti" + (index + 1);
-		
-		// raahailu
-		li.setAttribute("draggable", "true");
-		li.addEventListener("dragstart", (e) => {
-			e.dataTransfer.setData("text/plain", "rasti" + (index + 1));
-			e.dataTransfer.effectAllowed = 'move';
-			e.target.className = "dragging";
-		});
-		li.addEventListener("dragend", (e) => {
-			// poistaa dragging-classin targetilta
-			e.target.classList.remove("dragging");
-		});
-
-		// lisätään listaan
-		ul.appendChild(li);
-/* 
-		// lisätään rastin viite li-elementtiin
-		li.rasti = current; */
-	});
-
-	// droppausalue rasteille
-	ul.parentNode.addEventListener("dragover", (e) => {
-		e.preventDefault();
-		dragOverJoukkueTaiRasti(e, "rasti");
-	});
-
-	ul.parentNode.addEventListener("drop", (e) => {
-		e.preventDefault();
-		ul.appendChild(dropJoukkueTaiRasti(e, "rasti"));
-	});
-}
 
 
 // Droppaukseen liittyviä apufunktioita
@@ -447,4 +423,108 @@ function rainbow(numOfSteps, step) {
 function laskeJoukkueenMatka(joukkue) {
 	let matkanRastit = lisaaValiditRastileimaukset(joukkue.rastileimaukset);
 
+}
+
+
+
+/** VANHA VERSIO, EI KÄYTÖSSÄ TODO: poista
+ * Luo rastilistauksen datan perusteella aakkosjärjestykseen
+ * @param {Object} data, josta rastien tiedot haetaan
+ */
+ function luoRastit1(data) {
+	let ul = document.getElementById("rastilista");
+
+	let lista = Array.from(data.rastit);
+	lista.sort(jarjestaKoodinMukaan);
+
+	lista.forEach(function(current, index, list) {
+		let li = document.createElement("li");
+		li.textContent = current.koodi;
+		li.style.backgroundColor = rainbow(lista.length, index);
+		li.id = "rasti" + (index + 1);
+		
+		// raahailu
+		li.setAttribute("draggable", "true");
+		li.addEventListener("dragstart", (e) => {
+			e.dataTransfer.setData("text/plain", "rasti" + (index + 1));
+			e.dataTransfer.effectAllowed = 'move';
+			e.target.className = "dragging";
+		});
+		li.addEventListener("dragend", (e) => {
+			// poistaa dragging-classin targetilta
+			e.target.classList.remove("dragging");
+		});
+
+		// lisätään listaan
+		ul.appendChild(li);
+/* 
+		// lisätään rastin viite li-elementtiin
+		li.rasti = current; */
+	});
+
+	// droppausalue rasteille
+	ul.parentNode.addEventListener("dragover", (e) => {
+		e.preventDefault();
+		dragOverJoukkueTaiRasti(e, "rasti");
+	});
+
+	ul.parentNode.addEventListener("drop", (e) => {
+		e.preventDefault();
+		ul.appendChild(dropJoukkueTaiRasti(e, "rasti"));
+	});
+}
+
+/** VANHA VERSIO, EI KÄYTÖSSÄ TODO: poista
+ * Luo joukkuelistauksen sivulle datan perusteella aakkosjärjestykseen
+ * @param {Object} data, josta joukkueen tiedot haetaan
+ */
+ function luoJoukkueet1(data) {
+	let ul = document.getElementById("joukkuelista");
+
+	let lista = Array.from(data.joukkueet);
+	lista.sort(jarjestaNimenMukaan);
+
+	// jokaiselle listan osalle tehdään sama
+	lista.forEach(function(current, index, list) {
+		let li = document.createElement("li");
+		li.textContent = current.nimi;
+		li.style.backgroundColor = rainbow(lista.length, index);
+		li.id = "joukkue" + (index + 1);
+		
+		// raahailu-tapahtumat
+		li.setAttribute("draggable", "true");
+		li.addEventListener("dragstart", (e) => {
+			e.dataTransfer.setData("text/plain", "joukkue" + (index + 1));
+			e.dataTransfer.effectAllowed = 'move';
+			e.target.className = "dragging";
+		});
+		li.addEventListener("dragend", (e) => {
+			// poistaa dragging-classin targetilta
+			e.target.classList.remove("dragging");
+		});
+
+		// lisätään listaan
+		ul.appendChild(li);
+
+		// lisätään joukkueen viittaus li-elementtiin
+		li.joukkue = current;
+	});
+
+	// luodaan droppausalue diville
+	ul.parentNode.addEventListener("dragover", (e) => {
+		e.preventDefault();
+		dragOverJoukkueTaiRasti(e, "joukkue");
+	});
+
+	ul.parentNode.addEventListener("drop", (e) => {
+		e.preventDefault();
+
+		let node = e.target;
+		// jos bubblen kautta päätyy li-elementtiin:
+		if (node.nodeName == "LI") {
+			ul.insertBefore(dropJoukkueTaiRasti(e, "joukkue"), e.target);
+		} else {
+			ul.appendChild(dropJoukkueTaiRasti(e, "joukkue"));
+		}
+	});
 }
