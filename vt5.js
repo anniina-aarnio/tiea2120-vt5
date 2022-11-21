@@ -223,6 +223,7 @@ function luoKartanRastit(mymap, data) {
 	let rastit = Array.from(data.rastit);
 
 	let kaikki = [];
+	let markkeri = L.marker([rastit[0].lat, rastit[0].lon]);
 
 	rastit.forEach(function(current, index, list) {
 		let circle = L.circle(
@@ -243,8 +244,9 @@ function luoKartanRastit(mymap, data) {
 		.setContent(current.koodi);
 		circle.bindTooltip(text);
 
-		//TODO: lisää jokaiseen circleen rastin nimi
-		console.log(circle);
+		circle.on("click", (e) => {
+			klikatessaRastiYmpyraa(e, markkeri);
+		});
 
 		kaikki.push([current.lat, current.lon]);
 	});
@@ -323,6 +325,20 @@ function jarjestaKoodinMukaan(a, b) {
 	}
 	return 0;
 }
+
+/**
+ * Kun rastiympyrää klikkaa, luo markerin kyseisen rastin pisteeseen
+ * Markerille luodaan drag ?? TODO
+ * @param {Event} e
+ * @param {Marker} markkeri
+ */
+function klikatessaRastiYmpyraa(e, markkeri) {
+	console.log(e.target, markkeri);
+	markkeri = markkeri.setLatLng(e.target.getLatLng());
+	markkeri.addTo(e.target._map);
+	// e.target on klikattu ympyrä
+}
+
 
 /**
  * Tekee listan, jossa joukkueen mukaanlaskettavat rastit
