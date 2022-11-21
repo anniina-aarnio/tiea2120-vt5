@@ -403,8 +403,12 @@ function siirraYmpyraa(e) {
 		lisaaReittiKarttaan(current);
 	});
 
-
-
+	// poistetaan markkeri ja muutetaan ympyrä tavalliseksi
+	circle.setStyle({
+		fillOpacity: 0.1
+	});
+	
+	e.target.remove();
 }
 
 
