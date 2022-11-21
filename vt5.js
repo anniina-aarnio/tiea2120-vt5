@@ -167,11 +167,26 @@ function luoKartallaAlue(data) {
 
 	kartalla.addEventListener("drop", (e) => {
 		e.preventDefault();
-		let data = e.dataTransfer.getData("text");
 
-		if (data) {
+		let dataJ = e.dataTransfer.getData("joukkue");
+		let dataR = e.dataTransfer.getData("rasti");
+
+
+		if (dataJ) {
 			try {
-				let lisattava = document.getElementById(data);
+				let lisattava = document.getElementById(dataJ);
+				e.target.firstElementChild.appendChild(lisattava);
+				lisattava.style.left = String(e.offsetX) + "px";
+				lisattava.style.top = String(e.offsetY) + "px";
+				// jos lisätään joukkue, lisätään reitti karttaan
+				lisaaReittiKarttaan(document.getElementById(dataJ));
+			}
+			catch (error) {
+
+			}
+		} else if (dataR) {
+			try {
+				let lisattava = document.getElementById(dataR);
 				e.target.firstElementChild.appendChild(lisattava);
 				lisattava.style.left = String(e.offsetX) + "px";
 				lisattava.style.top = String(e.offsetY) + "px";
@@ -181,10 +196,8 @@ function luoKartallaAlue(data) {
 			}
 		}
 
-		// jos lisätään joukkue, lisätään reitti karttaan
-		if (data.startsWith("joukkue")) {
-			lisaaReittiKarttaan(document.getElementById(data));
-		}
+
+
 	});
 }
 
@@ -192,6 +205,13 @@ function luoKartallaAlue(data) {
 
 // Droppaukseen liittyviä apufunktioita
 
+/**
+ * Etsii e.dataTransferista datan tiedolla "joukkue" tai "rasti"
+ * ja muokkaa dragoverissa dropEffectin "move" tai "none" riippuen
+ * siitä, löytyykö sillä olevaa dataa sisältä.
+ * @param {Event} e 
+ * @param {String} joukkueTaiRasti "joukkue" tai "rasti" 
+ */
 function dragOverJoukkueTaiRasti(e, joukkueTaiRasti) {
 	let data = e.dataTransfer.getData(joukkueTaiRasti);
 	if (data) {
@@ -201,9 +221,16 @@ function dragOverJoukkueTaiRasti(e, joukkueTaiRasti) {
 	}
 }
 
+/**
+ * Etsii e.dataTransferista datan tiedolla "joukkue" tai "rasti"
+ * ja palauttaa sen joukkueen/rastin, jonka id on kulkenut mukana
+ * @param {Event} e 
+ * @param {String} joukkueTaiRasti "joukkue" tai "rasti" 
+ * @returns li-elementti, jossa datasta löytyvä id-tieto
+ */
 function dropJoukkueTaiRasti(e, joukkueTaiRasti) {
 	let data = e.dataTransfer.getData(joukkueTaiRasti);
-	console.log(data);
+
 	if (data.startsWith("joukkue")) {
 		let li = document.getElementById(data);
 		poistaReittiKartalta(li);
