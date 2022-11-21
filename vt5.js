@@ -223,9 +223,11 @@ function luoKartanRastit(mymap, data) {
 	let rastit = Array.from(data.rastit);
 
 	let kaikki = [];
-	let markkeri = L.marker([rastit[0].lat, rastit[0].lon]);
+	let markkeri = L.marker([rastit[0].lat, rastit[0].lon],
+		{draggable: true});
 
 	rastit.forEach(function(current, index, list) {
+		// luodaan ympyrä
 		let circle = L.circle(
 			[current.lat, current.lon], {
 				color: "red",
@@ -235,6 +237,10 @@ function luoKartanRastit(mymap, data) {
 			}
 		).addTo(mymap);
 
+		// lisätään viite rastiin
+		circle.rasti = current;
+
+		// lisätään teksti tooltipillä
 		let text = L.tooltip({
 			permanent: true,
 			direction: "center",
@@ -244,6 +250,7 @@ function luoKartanRastit(mymap, data) {
 		.setContent(current.koodi);
 		circle.bindTooltip(text);
 
+		// lisätään eventti klikkaukseen
 		circle.on("click", (e) => {
 			klikatessaRastiYmpyraa(e, markkeri);
 		});
@@ -333,10 +340,49 @@ function jarjestaKoodinMukaan(a, b) {
  * @param {Marker} markkeri
  */
 function klikatessaRastiYmpyraa(e, markkeri) {
-	console.log(e.target, markkeri);
-	markkeri = markkeri.setLatLng(e.target.getLatLng());
-	markkeri.addTo(e.target._map);
-	// e.target on klikattu ympyrä
+	// klikattu ympyrä
+	let circle = e.target;
+
+	// vaihtaa markkerin paikan klikattuun ympyrään
+
+	markkeri.setLatLng(circle.getLatLng());
+	markkeri.addTo(circle._map);
+	
+	// laittaa ensin vanhan circlen tiedot "normaaliksi"
+	if (markkeri.circle) {
+		markkeri.circle.setStyle({fillOpacity: 0.1});
+	}
+	// ottaa uuden ympyrän käyttöön
+	markkeri.circle = circle;
+
+	circle.setStyle({
+		fillOpacity: 1.0
+	});
+
+	markkeri.on("dragend", siirraYmpyraa);
+}
+
+
+/**
+ * Kun markeria siirtää kartalla, tiputtaessa ympyrä piirtyy samaan pisteeseen
+ * Samalla päivitetään rastin lat ja lon sekä lasketaan kaikkien joukkueiden
+ * reitit päivitetyn rastin tietojen kanssa
+ * @param {Event} e 
+ */
+function siirraYmpyraa(e) {
+	let circle = e.target.circle;
+	circle.setLatLng(e.target.getLatLng());
+
+
+
+}
+
+function klikatessaPoisRastiYmpyrasta(e, markkeri) {
+	let circle = e.target;
+	markkeri.remove();
+	circle.setStyle({
+		fillOpacity: 0.1,
+	});
 }
 
 
