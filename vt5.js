@@ -212,7 +212,7 @@ function dropJoukkueTaiRasti(e, joukkueTaiRasti) {
 }
 
 
-// Kartan luonnin apufunktioita
+// Kartan luonnin ja käytön apufunktioita
 
 /**
  * Luo karttaan kaikki datan rastit-listauksen rastit punaisina ympyröinä
@@ -372,6 +372,26 @@ function klikatessaRastiYmpyraa(e, markkeri) {
 function siirraYmpyraa(e) {
 	let circle = e.target.circle;
 	circle.setLatLng(e.target.getLatLng());
+
+	// haetaan joukkueiden li-elementit
+	let joukkueet = Array.from(document.getElementById("joukkuelista").childNodes);
+	let kartallaLit = Array.from(document.getElementById("kartallalista").childNodes);
+
+	kartallaLit.forEach((current, index, list) => {
+		if (current.id.startsWith("joukkue")) {
+			joukkueet.push(current);
+		}
+	});
+
+	joukkueet.forEach((current, index, list) => {
+		current.joukkue.matka = laskeJoukkueenMatka(current.joukkue).toFixed(1);
+		current.textContent = current.joukkue.nimi + " (" + current.joukkue.matka + ")";
+	});
+
+	kartallaLit.forEach((current, index, list) => {
+		poistaReittiKartalta(current);
+		lisaaReittiKarttaan(current);
+	});
 
 
 
