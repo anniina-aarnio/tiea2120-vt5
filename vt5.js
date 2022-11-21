@@ -95,16 +95,17 @@ function luoJoukkueetTaiRastit(data, joukkueTaiRasti) {
 	// luodaan listan jokaisesta alkiosta li-elementti ja lisätään listaan
 	lista.forEach(function(current, index, list) {
 		let li = document.createElement("li");
-
+		let nimiKoodi;
 		// joukkueen nimi ja viite joukkueeseen
 		if (joukkueTaiRasti == "joukkue") {
 			current.matka = laskeJoukkueenMatka(current).toFixed(1);
 			li.textContent = current.nimi + " (" + current.matka + " km)";
 			li.joukkue = current;
-
+			nimiKoodi = current.nimi;
 		// rastin nimi
 		} else {
 			li.textContent = current.koodi;
+			nimiKoodi = current.koodi;
 		}
 
 		// li-elementin taustaväri ja id
@@ -114,7 +115,8 @@ function luoJoukkueetTaiRastit(data, joukkueTaiRasti) {
 		// raahailu
 		li.setAttribute("draggable", "true");
 		li.addEventListener("dragstart", (e) => {
-			e.dataTransfer.setData("text/plain", joukkueTaiRasti + (index + 1));
+			e.dataTransfer.setData("text/plain", nimiKoodi);
+			e.dataTransfer.setData(joukkueTaiRasti, joukkueTaiRasti + (index + 1));
 			e.dataTransfer.effectAllowed = 'move';
 			e.target.className = "dragging";
 		});
@@ -137,10 +139,10 @@ function luoJoukkueetTaiRastit(data, joukkueTaiRasti) {
 	ul.parentNode.addEventListener("drop", (e) => {
 		e.preventDefault();
 
-		let node = e.target;
+		let kohde = e.target;
 		// jos bubblen kautta päätyy li-elementtiin:
-		if (node.nodeName == "LI") {
-			ul.insertBefore(dropJoukkueTaiRasti(e, joukkueTaiRasti), e.target);
+		if (kohde.nodeName == "LI") {
+			ul.insertBefore(dropJoukkueTaiRasti(e, joukkueTaiRasti), kohde);
 		} else {
 			ul.appendChild(dropJoukkueTaiRasti(e, joukkueTaiRasti));
 		}
@@ -191,8 +193,8 @@ function luoKartallaAlue(data) {
 // Droppaukseen liittyviä apufunktioita
 
 function dragOverJoukkueTaiRasti(e, joukkueTaiRasti) {
-	let data = e.dataTransfer.getData("text");
-	if (data.startsWith(joukkueTaiRasti)) {
+	let data = e.dataTransfer.getData(joukkueTaiRasti);
+	if (data) {
 		e.dataTransfer.dropEffect = "move";
 	} else {
 		e.dataTransfer.dropEffect = "none";
@@ -200,7 +202,8 @@ function dragOverJoukkueTaiRasti(e, joukkueTaiRasti) {
 }
 
 function dropJoukkueTaiRasti(e, joukkueTaiRasti) {
-	let data = e.dataTransfer.getData("text");
+	let data = e.dataTransfer.getData(joukkueTaiRasti);
+	console.log(data);
 	if (data.startsWith("joukkue")) {
 		let li = document.getElementById(data);
 		poistaReittiKartalta(li);
