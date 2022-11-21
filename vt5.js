@@ -370,9 +370,12 @@ function klikatessaRastiYmpyraa(e, markkeri) {
  * @param {Event} e 
  */
 function siirraYmpyraa(e) {
+	// markerin yhteydessä oleva ympyrä
 	let circle = e.target.circle;
 	let piste = e.target.getLatLng();
 	circle.setLatLng(piste);
+
+	// muutetaan rastin lat ja lng asianmukaisesti
 	circle.rasti.lat = piste.lat;
 	circle.rasti.lon = piste.lng;
 
@@ -380,17 +383,21 @@ function siirraYmpyraa(e) {
 	let joukkueet = Array.from(document.getElementById("joukkuelista").childNodes);
 	let kartallaLit = Array.from(document.getElementById("kartallalista").childNodes);
 
+	// lisätään joukkuelistaan kartalla olevista li-elementeistä joukkueet
+	// (voisi muuttaa että joukkue-li-elementillä olisi class "joukkue" niin olisi nätimpi)
 	kartallaLit.forEach((current, index, list) => {
 		if (current.id.startsWith("joukkue")) {
 			joukkueet.push(current);
 		}
 	});
 
+	// lasketaan kaikkien joukkueiden matka uudestaan ja muutetaan tieto li-elementtiin näkyville
 	joukkueet.forEach((current, index, list) => {
 		current.joukkue.matka = laskeJoukkueenMatka(current.joukkue).toFixed(1);
 		current.textContent = current.joukkue.nimi + " (" + current.joukkue.matka + ")";
 	});
 
+	// poistetaan vanha joukkuepiirros ja piirretään mahdollisesti uudistunut reitti karttaan
 	kartallaLit.forEach((current, index, list) => {
 		poistaReittiKartalta(current);
 		lisaaReittiKarttaan(current);
@@ -398,14 +405,6 @@ function siirraYmpyraa(e) {
 
 
 
-}
-
-function klikatessaPoisRastiYmpyrasta(e, markkeri) {
-	let circle = e.target;
-	markkeri.remove();
-	circle.setStyle({
-		fillOpacity: 0.1,
-	});
 }
 
 
