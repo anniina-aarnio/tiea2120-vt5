@@ -371,7 +371,10 @@ function klikatessaRastiYmpyraa(e, markkeri) {
  */
 function siirraYmpyraa(e) {
 	let circle = e.target.circle;
-	circle.setLatLng(e.target.getLatLng());
+	let piste = e.target.getLatLng();
+	circle.setLatLng(piste);
+	circle.rasti.lat = piste.lat;
+	circle.rasti.lon = piste.lng;
 
 	// haetaan joukkueiden li-elementit
 	let joukkueet = Array.from(document.getElementById("joukkuelista").childNodes);
